@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 api = Api(app)
+ns_rest = api.namespace('rest', description='Subsonic REST')
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 env_path = Path('.') / '.env'

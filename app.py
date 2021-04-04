@@ -1,7 +1,7 @@
-from config import app, api
+from config import app, api, ns_rest
 from flask_restplus import Resource
 
-@api.route('/hello')
+@ns_rest.route('/hello')
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
