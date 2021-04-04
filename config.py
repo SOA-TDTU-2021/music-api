@@ -1,10 +1,18 @@
 from flask import Flask
+try:
+    from flask_restplus import Api
+except ImportError:
+    import werkzeug
+    werkzeug.cached_property = werkzeug.utils.cached_property
+    from flask_restplus import Api
 from flask_sqlalchemy import SQLAlchemy
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+api = Api(app)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
