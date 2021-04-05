@@ -1,6 +1,30 @@
-from config import app, api, ns_rest
-from flask import send_file, safe_join
-from flask_restplus import Resource
+from config import app, api, jwt, ns_rest
+import db
+from flask import request, send_file, safe_join, jsonify
+from flask_restplus import Resource, fields
+from flask_jwt_extended import current_user, jwt_required, set_access_cookies, unset_jwt_cookies
+
+@jwt.user_identity_loader
+def student_identity_lookup(user):
+    return user.email
+
+@jwt.user_lookup_loader
+def student_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return db.get_user_by_email(identity)
+
+@ns_rest.route('/login')
+class UserLogin(Resource):
+    @api.expect(api.model('Login model',
+        {'email': fields.String(required = True),
+            'password': fields.String(required = True)}))
+    def post(self):
+        data = request.get_json()
+        user = db.get_user_by_email(data['email'])
+        if user.check_password(data['password']):
+            return {'success': True, 'message': 'Đăng nhập thành công', 'access_token':  user.generate_jwt()}
+        else:
+            api.abort(403, 'Sai tên đang nhập hoặc mật khẩu', success=False)
 
 @ns_rest.route('/ping')
 class Ping(Resource):

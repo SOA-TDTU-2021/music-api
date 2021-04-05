@@ -1,4 +1,6 @@
 from config import sql
+from flask_jwt_extended import create_access_token
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import math, random, uuid
 
@@ -19,6 +21,19 @@ class User(sql.Model):
     rated_albums = sql.relationship('AlbumRating', backref=sql.backref('rated_by', lazy=True))
     rated_tracks = sql.relationship('TrackRating', backref=sql.backref('rated_by', lazy=True))
     rated_playlists = sql.relationship('PlaylistRating', backref=sql.backref('rated_by', lazy=True))
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def generate_jwt(self):
+        """
+        Generates the Auth Token
+        :return: string
+        """
+        return create_access_token(identity=self)
 
 albums_artists = sql.Table('albums_artists',
     sql.Column('album_id', sql.Integer, sql.ForeignKey("album.id"), primary_key=True),
@@ -108,3 +123,15 @@ class PlayCount(sql.Model):
     track_id = sql.Column(sql.Integer, sql.ForeignKey("track.id"), primary_key=True)
     user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"), primary_key=True)
     count = sql.Column(sql.Integer)
+
+def get_user_by_id(user_id):
+    return User.query.filter_by(id=user_id).one_or_none()
+
+def get_user_by_email(user_email):
+    return User.query.filter_by(email=user_email).one_or_none()
+
+sql.create_all()
+user = User(name='Sang', email='xsang.bui@gmail.com')
+user.set_password('1234')
+sql.session.add(user)
+sql.session.commit()
