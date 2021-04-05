@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import get_jwt
 from flask_jwt_extended import get_jwt_identity
+from flask_cors import CORS
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -28,6 +29,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://"+USER+":"+PASS+"@"+SER
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
 
+CORS(app)
 api = Api(app)
 jwt = JWTManager(app)
 sql = SQLAlchemy(app)
