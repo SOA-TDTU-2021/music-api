@@ -26,6 +26,17 @@ class UserLogin(Resource):
         else:
             api.abort(403, 'Sai tên đang nhập hoặc mật khẩu', success=False)
 
+@ns_rest.route('/register')
+class UserRegister(Resource):
+    @api.expect(api.model('Register model',
+        {'name': fields.String(required = True),
+            'email': fields.String(required = True),
+            'password': fields.String(required = True)}))
+    def post(self):
+        data = request.get_json()
+        is_success = db.add_user(name=data['name'], email=data['email'], password=data['password']) is not None
+        return {'success': is_success}
+
 @ns_rest.route('/ping')
 class Ping(Resource):
     def get(self):

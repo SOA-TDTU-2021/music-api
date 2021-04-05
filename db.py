@@ -130,8 +130,18 @@ def get_user_by_id(user_id):
 def get_user_by_email(user_email):
     return User.query.filter_by(email=user_email).one_or_none()
 
-sql.create_all()
-user = User(name='Sang', email='xsang.bui@gmail.com')
-user.set_password('1234')
-sql.session.add(user)
-sql.session.commit()
+def add_user(name, email, password):
+    user = User(name=name, email=email)
+    user.set_password(password)
+    sql.session.add(user)
+    try:
+        sql.session.commit()
+        return user.id
+    except Exception as e:
+        return None
+
+# sql.create_all()
+# user = User(name='Sang', email='xsang.bui@gmail.com')
+# user.set_password('1234')
+# sql.session.add(user)
+# sql.session.commit()
