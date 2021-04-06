@@ -52,7 +52,6 @@ class GetPlaylists(Resource):
 @ns_rest.route('/getCoverArt')
 @api.representation('image/jpeg')
 class GetPlaylists(Resource):
-    @jwt_required()
     def get(self):
         filepath = safe_join("./", "rosé.jpg")
         return send_file(
