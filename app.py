@@ -115,7 +115,18 @@ class getCoverArt(Resource):
 class getArtists(Resource):
     @jwt_required()
     def get(self):
-        return {    "success": True,    "artists": {      "ignoredArticles": "The El La Los Las Le",      "index": [        {          "name": "S",          "artist": [            {              "id": "18",              "name": "Shearer",              "coverArt": "ar-18",              "artistImageUrl": "https://lastfm-img2.akamaized.net/i/u/a7994c768b914543a2f2928d42559311.png",              "albumCount": 2            },            {              "id": "3",              "name": "Silence is Sexy",              "coverArt": "ar-3",              "artistImageUrl": "https://lastfm-img2.akamaized.net/i/u/959cdf5d084e4d42864a919281b3d58e.png",              "albumCount": 2            }          ]        },        {          "name": "U",          "artist": [            {              "id": "13",              "name": "Ugress",              "coverArt": "ar-13",              "artistImageUrl": "https://lastfm-img2.akamaized.net/i/u/6f2ce47efe15482eb5a3592e4d193ce7.png",              "albumCount": 4            }          ]        }      ]    }  }
+        try:
+            artists = db.get_all_artists()
+            return {
+                'success': True,
+                'artists': {
+                    'ignoredArticles': 'The El La Los Las Le',
+                    'index': artists
+                }
+            }
+        except Exception as e:
+            print(e)
+            return {'success': False, 'message': 'Failed to get artists'}
 
 @ns_rest.route('/getGenres')
 class getGenres(Resource):

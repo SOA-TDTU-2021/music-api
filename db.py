@@ -36,14 +36,14 @@ class User(sql.Model):
         """
         return create_access_token(identity=self)
 
-albums_artists = sql.Table('albums_artists',
-    sql.Column('album_id', sql.Integer, sql.ForeignKey("album.id"), primary_key=True),
-    sql.Column('artist_id', sql.Integer, sql.ForeignKey("artist.id"), primary_key=True)
-)
-
 playlists_tracks = sql.Table('playlists_tracks',
     sql.Column('playlist_id', sql.Integer, sql.ForeignKey("playlist.id"), primary_key=True),
     sql.Column('track_id', sql.Integer, sql.ForeignKey("track.id"), primary_key=True)
+)
+
+albums_artists = sql.Table('albums_artists',
+    sql.Column('album_id', sql.Integer, sql.ForeignKey("album.id"), primary_key=True),
+    sql.Column('artist_id', sql.Integer, sql.ForeignKey("artist.id"), primary_key=True)
 )
 
 tracks_artists = sql.Table('tracks_artists',
@@ -60,10 +60,6 @@ class Artist(sql.Model):
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
-    albums = sql.relationship('Album', secondary=albums_artists, lazy='subquery',
-        backref=sql.backref('artists', lazy=True))
-    tracks = sql.relationship('Track', secondary=tracks_artists, lazy='subquery',
-        backref=sql.backref('artists', lazy=True))
 
 class Genre(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
@@ -78,6 +74,8 @@ class Track(sql.Model):
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
     album_id = sql.Column(sql.Integer, sql.ForeignKey("album.id"))
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
+    artists = sql.relationship('Artist', secondary=tracks_artists, lazy='subquery',
+        backref=sql.backref('tracks', lazy=True))
     rated = sql.relationship('TrackRating', backref=sql.backref('track', lazy=True))
     played = sql.relationship('Played', backref=sql.backref('track', lazy=True))
 
@@ -91,6 +89,8 @@ class Album(sql.Model):
     genres_id = sql.Column(sql.Integer, sql.ForeignKey("genre.id"))
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
     tracks = sql.relationship('Track', backref=sql.backref('album', lazy=True))
+    artists = sql.relationship('Artist', secondary=albums_artists, lazy='subquery',
+        backref=sql.backref('albums', lazy=True))
     rated = sql.relationship('AlbumRating', backref=sql.backref('album', lazy=True))
 
 class Playlist(sql.Model):
@@ -161,5 +161,37 @@ def get_all_playlists():
             'created': str(p.date_added),
             'changed': str(p.date_modified),
             'coverArt': p.image
+        })
+    return result
+
+def get_all_artists():
+    artists = Artist.query.all()
+    result = []
+    indexes = {}
+    for a in artists:
+        first_char = a.name[0].upper()
+        count = 0
+        for album in a.albums:
+            count += 1
+        if first_char not in indexes.keys():
+            indexes[first_char] = [{
+                'id': a.id,
+                'name': a.name,
+                'coverArt': a.avatar_file,
+                'artistImageUrl': 'https://lastfm-img2.akamaized.net/i/u/da0f3b84bd72470492de2a2dc58afbe2.png',
+                'albumCount': count
+            }]
+        else:
+            indexes[first_char].append({
+                'id': a.id,
+                'name': a.name,
+                'coverArt': a.avatar_file,
+                'artistImageUrl': 'https://lastfm-img2.akamaized.net/i/u/da0f3b84bd72470492de2a2dc58afbe2.png',
+                'albumCount': count
+            })
+    for i in indexes.keys():
+        result.append({
+            'name': i,
+            'artist': indexes[i]
         })
     return result
