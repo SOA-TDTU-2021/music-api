@@ -41,7 +41,12 @@ class UserRegister(Resource):
 class GetPlaylists(Resource):
     @jwt_required()
     def get(self):
-        return {      "success" : True,      "playlists" : {         "playlist" : [ {            "id" : "1144",            "name" : "2020-06-05. new",            "comment" : "",            "owner" : "guest4",            "public" : True,            "songCount" : 12,            "duration" : 2483,            "created" : "2020-08-23T15:05:42.579Z",            "changed" : "2021-04-04T08:25:29.823Z",            "coverArt" : "pl-1144"         }, {            "id" : "453",            "name" : "Apr 24, 2018 5:01 PM",            "owner" : "guest4",            "public" : False,            "songCount" : 22,            "duration" : 5555,            "created" : "2018-04-24T17:01:16.839Z",            "changed" : "2020-11-25T18:38:50.686Z",            "coverArt" : "pl-453"         } ]      }   }
+        try:
+            playlists = db.get_all_playlists()
+            return {'success': True, 'playlists': {'playlist': playlists}}
+        except Exception as e:
+            print(e)
+            return {'success': False, 'message': 'Failed to get playlists'}
 
 @ns_rest.route('/getAlbumList')
 class GetPlaylists(Resource):

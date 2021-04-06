@@ -140,8 +140,20 @@ def add_user(name, email, password):
     except Exception as e:
         return None
 
-# sql.create_all()
-# user = User(name='Sang', email='xsang.bui@gmail.com')
-# user.set_password('1234')
-# sql.session.add(user)
-# sql.session.commit()
+def get_all_playlists():
+    result = []
+    playlists = Playlist.query.all()
+    for p in playlists:
+        result.append({
+            'id': p.id,
+            'name': p.name,
+            'comment': '',
+            'owner': p.created_by.name,
+            'public': p.is_public,
+            'songCount': 12,
+            'duration': 2483,
+            'created': str(p.date_added),
+            'changed': str(p.date_modified),
+            'coverArt': p.image
+        })
+    return result
