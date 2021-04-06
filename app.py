@@ -236,6 +236,39 @@ class getSongsByGenre(Resource):
             })
         return {'success': True, 'songsByGenre': {'song': result}}
 
+@ns_rest.route('/getRandomSongs')
+class getRandomSongs(Resource):
+    @jwt_required()
+    def get(self):
+        size = request.args.get('size')
+        result = []
+        tracks = db.Track.query.order_by(func.random()).limit(size).all()
+        for t in tracks:
+            result.append({
+                'id': t.id,
+                'parent': 25,
+                'isDir': False,
+                'title': t.name,
+                'album': t.album.title,
+                'artist': 'Artist 1',
+                'track': len(t.album.tracks),
+                'genre': t.genre_name,
+                'coverArt': t.album.cover_image,
+                'size': 123456,
+                'contentType': 'audio/mpeg',
+                'suffix': 'mp3',
+                'duration': 285,
+                'bitRate': 128,
+                'path': 'tracks/track1.mp3',
+                'playCount': 1000,
+                'created': str(t.date_added),
+                'starred': str(t.date_added),
+                'albumId': t.album.id,
+                'artistId': '1',
+                'type': 'music'
+            })
+        return {'success': True, 'randomSongs': {'song': result}}
+
 @ns_rest.route('/getStarred2')
 class getStarred2(Resource):
     @jwt_required()
