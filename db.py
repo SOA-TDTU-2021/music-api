@@ -226,7 +226,9 @@ def get_artist(artist_id):
 def get_album(user, album_id):
     album = Album.query.filter_by(id=album_id).one_or_none()
     songs = []
+    starred_album = AlbumRating.query.filter_by(album_id=album.id).filter_by(user_id=user.id).one_or_none()
     for tr in album.tracks:
+        starred_track = TrackRating.query.filter_by(track_id=tr.id)
         songs.append({
             'id': tr.id,
             'parent': 261,
@@ -246,12 +248,11 @@ def get_album(user, album_id):
             'path': 'tracks/track1.mp3',
             'playCount': 1000,
             'created': str(tr.date_added),
-            'starred': str(tr.date_added),
+            'starred': starred_track is not None,
             'albumId': album.id,
-            'artistId': '1',
+            'artistId': 1,
             'type': 'music'
         })
-    starred = AlbumRating.query.filter_by(album_id=album.id).filter_by(user_id=user.id).one_or_none()
     return {
         'id': album.id,
         'name': album.title,
@@ -262,7 +263,7 @@ def get_album(user, album_id):
         'duration': 1234,
         'playCount': 100000,
         'created': str(album.date_added),
-        'starred': starred is not None,
+        'starred': starred_album is not None,
         'year': 2021,
         'genre': album.genre.name,
         'song': songs
@@ -282,6 +283,27 @@ def star_album(user, album_id):
 def unstar_album(user, album_id):
     try:
         star = AlbumRating.query.filter_by(album_id=album_id).filter_by(user_id=user.id).one_or_none()
+        sql.session.delete(star)
+        sql.session.commit()
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+def star_track(user, track_id):
+    star = TrackRating(track_id=track_id)
+    try:
+        user.rated_tracks.append(star)
+        sql.session.add(user)
+        sql.session.commit()
+        return star.track_id
+    except Exception as e:
+        print(e)
+        return None
+
+def unstar_track(user, track_id):
+    try:
+        star = TrackRating.query.filter_by(track_id=track_id).filter_by(user_id=user.id).one_or_none()
         sql.session.delete(star)
         sql.session.commit()
         return True

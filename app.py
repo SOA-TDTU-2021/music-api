@@ -170,7 +170,11 @@ class getArtist(Resource):
 class star(Resource):
     @jwt_required()
     def get(self):
-        if request.args.get('albumId'):
+        if request.args.get('id'):
+            track_id = request.args.get('id')
+            success = db.star_track(current_user, track_id) is not None
+            return {'success': success}
+        elif request.args.get('albumId'):
             album_id = request.args.get('albumId')
             success = db.star_album(current_user, album_id) is not None
             return {'success': success}
@@ -181,7 +185,11 @@ class star(Resource):
 class unstar(Resource):
     @jwt_required()
     def get(self):
-        if request.args.get('albumId'):
+        if request.args.get('id'):
+            track_id = request.args.get('id')
+            success = db.unstar_track(current_user, track_id)
+            return {'success': success}
+        elif request.args.get('albumId'):
             album_id = request.args.get('albumId')
             success = db.unstar_album(current_user, album_id)
             return {'success': success}
@@ -232,7 +240,34 @@ class getSongsByGenre(Resource):
 class getStarred2(Resource):
     @jwt_required()
     def get(self):
-        return {    "success": True,    "starred2": {      "song": [        {          "id": "358",          "parent": "346",          "isDir": false,          "title": "Drop that apple, bitch!",          "album": "Eve",          "artist": "Shearer",          "track": 8,          "year": 2008,          "genre": "Rock",          "coverArt": "346",          "size": 614528,          "contentType": "audio/mpeg",          "suffix": "mp3",          "duration": 37,          "bitRate": 128,          "path": "Shearer/Eve/08 - Drop that apple, bitch!.mp3",          "averageRating": 1,          "playCount": 747,          "created": "2017-03-12T11:05:16.000Z",          "starred": "2021-04-04T08:59:22.515Z",          "albumId": "37",          "artistId": "18",          "type": "music"        },        {          "id": "273",          "parent": "261",          "isDir": false,          "title": "Project Wildfire",          "album": "Robot Wars",          "artist": "Binärpilot",          "track": 4,          "year": 2007,          "genre": "Electronic",          "coverArt": "261",          "size": 5060736,          "contentType": "audio/mpeg",          "suffix": "mp3",          "duration": 316,          "bitRate": 128,          "path": "Binaerpilot/Robot Wars/04_binaerpilot_-_project_wildfire.mp3",          "averageRating": 5,          "playCount": 2734,          "created": "2017-03-12T11:08:03.000Z",          "starred": "2021-04-04T08:58:55.660Z",          "albumId": "29",          "artistId": "15",          "type": "music"        },        {          "id": "369",          "parent": "368",          "isDir": false,          "title": "Faya Ska",          "album": "Full Faya II",          "artist": "FUll Faya Orchestra",          "track": 2,          "year": 2008,          "genre": "Reggae",          "coverArt": "368",          "size": 4255872,          "contentType": "audio/mpeg",          "suffix": "mp3",          "duration": 264,          "bitRate": 128,          "path": "Full Faya Orchestra/Full Faya II/02 - Faya Ska.mp3",          "playCount": 1316,          "created": "2017-03-12T11:05:23.000Z",          "starred": "2018-09-25T06:54:12.810Z",          "albumId": "38",          "artistId": "19",          "type": "music"        }      ]    }  }
+        result = []
+        rating = db.TrackRating.query.filter_by(user_id=current_user.id).all()
+        for r in rating:
+            t = r.track
+            result.append({
+                'id': t.id,
+                'parent': 25,
+                'isDir': False,
+                'title': t.name,
+                'album': t.album.title,
+                'artist': 'Artist 1',
+                'track': len(t.album.tracks),
+                'genre': t.genre_name,
+                'coverArt': t.album.cover_image,
+                'size': 123456,
+                'contentType': 'audio/mpeg',
+                'suffix': 'mp3',
+                'duration': 285,
+                'bitRate': 128,
+                'path': 'tracks/track1.mp3',
+                'playCount': 1000,
+                'created': str(t.date_added),
+                'starred': str(t.date_added),
+                'albumId': t.album.id,
+                'artistId': '1',
+                'type': 'music'
+            })
+        return {'success': True, 'starred2': {'song': result}}
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
