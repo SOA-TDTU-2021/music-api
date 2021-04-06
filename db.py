@@ -193,6 +193,35 @@ def get_all_artists():
         })
     return result
 
+def get_artist(artist_id):
+    artist = Artist.query.filter_by(id=artist_id).one_or_none()
+    albums = []
+    count = 0
+    for album in artist.albums:
+        count += 1
+        albums.append({
+            'id': album.id,
+            'name': album.title,
+            'artist': 'Artist 1',
+            'artistId': '1',
+            'coverArt': album.cover_image,
+            'songCount': 2,
+            'duration': 1234,
+            'playCount': 100000,
+            'created': str(album.date_added),
+            'year': 2021,
+            'genre': album.genre.name
+        })
+    return {
+        'id': artist.id,
+        'name': artist.name,
+        'description': 'Xin chào, mình là Sang đây!',
+        'coverArt': artist.avatar_file,
+        'artistImageUrl': artist.avatar_file,
+        'albumCount': count,
+        'album': albums
+    }
+
 def get_album(user, album_id):
     album = Album.query.filter_by(id=album_id).one_or_none()
     songs = []

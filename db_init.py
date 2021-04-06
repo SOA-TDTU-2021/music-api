@@ -45,6 +45,8 @@ played3 = db.Played(user_id=1, track_id=1, count=2)
 
 sql.session.add(user)
 sql.session.add(user2)
+sql.session.add(playlist)
+sql.session.add(playlist2)
 sql.session.add(genre)
 sql.session.add(played)
 sql.session.add(played2)

@@ -63,7 +63,7 @@ class getAlbumList(Resource):
                 albums = db.Album.query.order_by(func.random()).offset(offset).limit(limit).all()
             elif request_type == 'recent':
                 albums = []
-                played = db.Played.query.filter_by(user_id=current_user.id).order_by(desc(db.Played.play_time)).offset(offset).limit(limit).all()
+                played = db.Played.query.filter_by(user_id=current_user.id).order_by(desc(db.Played.last_play_time)).offset(offset).limit(limit).all()
                 for p in played:
                     if p.track.album in albums:
                         continue
@@ -145,6 +145,13 @@ class getArtists(Resource):
         except Exception as e:
             print(e)
             return {'success': False, 'message': 'Failed to get artists'}
+
+@ns_rest.route('/getArtist')
+class getArtist(Resource):
+    @jwt_required()
+    def get(self):
+        artist_id = request.args.get('id')
+        return {'success': True, 'artist': db.get_artist(artist_id)}
 
 @ns_rest.route('/star')
 class star(Resource):
