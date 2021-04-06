@@ -62,8 +62,7 @@ class Artist(sql.Model):
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
 
 class Genre(sql.Model):
-    id = sql.Column(sql.Integer, primary_key=True)
-    name = sql.Column(sql.String(100))
+    name = sql.Column(sql.String(100), primary_key=True)
     tracks = sql.relationship('Track', backref=sql.backref('genre', lazy=True))
     albums = sql.relationship('Album', backref=sql.backref('genre', lazy=True))
 
@@ -73,7 +72,7 @@ class Track(sql.Model):
     duration = sql.Column(sql.Integer)
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
-    genre_id = sql.Column(sql.Integer, sql.ForeignKey("genre.id"))
+    genre_name = sql.Column(sql.String(100), sql.ForeignKey("genre.name"))
     album_id = sql.Column(sql.Integer, sql.ForeignKey("album.id"))
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
     artists = sql.relationship('Artist', secondary=tracks_artists, lazy='subquery',
@@ -88,7 +87,7 @@ class Album(sql.Model):
     date_release = sql.Column(sql.DateTime, default=datetime(1970, 1, 1))
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
-    genre_id = sql.Column(sql.Integer, sql.ForeignKey("genre.id"))
+    genre_name = sql.Column(sql.String(100), sql.ForeignKey("genre.name"))
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
     tracks = sql.relationship('Track', backref=sql.backref('album', lazy=True))
     artists = sql.relationship('Artist', secondary=albums_artists, lazy='subquery',

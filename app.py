@@ -183,6 +183,40 @@ class getGenres(Resource):
     def get(self):
         return {'success': True, 'genres': {'genre': db.get_genres()}}
 
+@ns_rest.route('/getSongsByGenre')
+class getSongsByGenre(Resource):
+    @jwt_required()
+    def get(self):
+        offset = request.args.get('offset')
+        count = request.args.get('count')
+        result = []
+        tracks = db.Track.query.filter_by(genre_name=request.args.get('genre')).offset(offset).limit(count).all()
+        for t in tracks:
+            result.append({
+                'id': t.id,
+                'parent': 25,
+                'isDir': False,
+                'title': t.name,
+                'album': t.album.title,
+                'artist': 'Artist 1',
+                'track': len(t.album.tracks),
+                'genre': t.genre_name,
+                'coverArt': t.album.cover_image,
+                'size': 123456,
+                'contentType': 'audio/mpeg',
+                'suffix': 'mp3',
+                'duration': 285,
+                'bitRate': 128,
+                'path': 'tracks/track1.mp3',
+                'playCount': 1000,
+                'created': str(t.date_added),
+                'starred': str(t.date_added),
+                'albumId': t.album.id,
+                'artistId': '1',
+                'type': 'music'
+            })
+        return {'success': True, 'songsByGenre': {'song': result}}
+
 @ns_rest.route('/getStarred2')
 class getStarred2(Resource):
     @jwt_required()
