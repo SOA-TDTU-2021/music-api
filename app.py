@@ -3,6 +3,8 @@ import db
 from flask import request, send_file, safe_join, jsonify
 from flask_restplus import Resource, fields
 from flask_jwt_extended import current_user, jwt_required, set_access_cookies, unset_jwt_cookies
+from sqlalchemy import asc, desc
+from sqlalchemy.sql.expression import func
 
 @jwt.user_identity_loader
 def student_identity_lookup(user):
@@ -52,7 +54,52 @@ class GetPlaylists(Resource):
 class getAlbumList(Resource):
     @jwt_required()
     def get(self):
-        return {      "success" : True,      "albumList2" : {         "album" : [ {            "id" : "29",            "name" : "Robot Wars",            "artist" : "Binärpilot",            "artistId" : "15",            "coverArt" : "al-29",            "songCount" : 6,            "duration" : 1678,            "playCount" : 21240,            "created" : "2017-03-12T11:08:04.000Z",            "year" : 2007,            "genre" : "Electronic"         }, {            "id" : "28",            "name" : "Defrag",            "artist" : "Binärpilot",            "artistId" : "15",            "coverArt" : "al-28",            "songCount" : 4,            "duration" : 916,            "playCount" : 13701,            "created" : "2017-03-12T11:08:01.000Z",            "year" : 2005,            "genre" : "Electronic"         } ]      }   }
+        request_type = request.args.get('type')
+        size = request.args.get('size')
+        offset = request.args.get('offset')
+        limit = offset + size
+        try:
+            if request_type == 'random':
+                albums = db.Album.query.order_by(func.random()).offset(offset).limit(limit).all()
+            elif request_type == 'recent':
+                albums = []
+                played = db.Played.query.filter_by(user_id=current_user.id).order_by(desc(db.Played.play_time)).offset(offset).limit(limit).all()
+                for p in played:
+                    if p.track.album in albums:
+                        continue
+                    albums.append(p.track.album)
+            elif request_type == 'frequent':
+                albums = []
+                played = db.Played.query.filter_by(user_id=current_user.id).order_by(db.Played.count).offset(offset).limit(limit).all()
+                for p in played:
+                    if p.track.album in albums:
+                        continue
+                    albums.append(p.track.album)
+            elif request_type == 'newest':
+                albums = db.Album.query.order_by(db.Album.title).offset(offset).limit(limit).all()
+            elif request_type == 'alphabeticalByName':
+                albums = db.Album.query.order_by(func.random()).offset(offset).limit(limit).all()
+            else:
+                return {'success': False, 'message': 'Wrong album type'}
+            result = []
+            for a in albums:
+                result.append({
+                    'id': a.id,
+                    'name': a.title,
+                    'artist': 'Rosé',
+                    'artistId': '1',
+                    'coverArt': a.cover_image,
+                    'songCount': 6,
+                    'duration': 1678,
+                    'playCount': 1234,
+                    'created': str(a.date_added),
+                    'year': 2007,
+                    'genre': a.genre.name
+                })
+            return {'success': True, 'albumList2': {'album': result}}
+        except Exception as e:
+            print(e)
+            return {'success': False, 'message': 'Failed to get playlists'}
 
 @ns_rest.route('/getCoverArt')
 @api.representation('image/jpeg')

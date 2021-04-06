@@ -21,6 +21,7 @@ class User(sql.Model):
     rated_albums = sql.relationship('AlbumRating', backref=sql.backref('rated_by', lazy=True))
     rated_tracks = sql.relationship('TrackRating', backref=sql.backref('rated_by', lazy=True))
     rated_playlists = sql.relationship('PlaylistRating', backref=sql.backref('rated_by', lazy=True))
+    played = sql.relationship('Played', backref=sql.backref('user', lazy=True))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -72,11 +73,13 @@ class Genre(sql.Model):
 class Track(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     name = sql.Column(sql.String(100))
-    duration = sql.Column(sql.Float)
+    duration = sql.Column(sql.Integer)
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
+    album_id = sql.Column(sql.Integer, sql.ForeignKey("album.id"))
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
     rated = sql.relationship('TrackRating', backref=sql.backref('track', lazy=True))
+    played = sql.relationship('Played', backref=sql.backref('track', lazy=True))
 
 class Album(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
@@ -87,6 +90,7 @@ class Album(sql.Model):
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
     genres_id = sql.Column(sql.Integer, sql.ForeignKey("genre.id"))
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
+    tracks = sql.relationship('Track', backref=sql.backref('album', lazy=True))
     rated = sql.relationship('AlbumRating', backref=sql.backref('album', lazy=True))
 
 class Playlist(sql.Model):
@@ -119,10 +123,12 @@ class PlaylistRating(sql.Model):
     star = sql.Column(sql.Integer)
     time = sql.Column(sql.DateTime, default=datetime.now)
 
-class PlayCount(sql.Model):
-    track_id = sql.Column(sql.Integer, sql.ForeignKey("track.id"), primary_key=True)
-    user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"), primary_key=True)
+class Played(sql.Model):
+    id = sql.Column(sql.Integer, primary_key=True)
+    user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
+    track_id = sql.Column(sql.Integer, sql.ForeignKey("track.id"))
     count = sql.Column(sql.Integer)
+    play_time = sql.Column('time', sql.DateTime, default=datetime.now)
 
 def get_user_by_id(user_id):
     return User.query.filter_by(id=user_id).one_or_none()
