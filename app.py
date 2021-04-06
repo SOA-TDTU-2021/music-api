@@ -131,6 +131,17 @@ class stream(Resource):
             mimetype="audio/mpeg"
         )
 
+@ns_rest.route('/download')
+@api.representation('application/x-download')
+class stream(Resource):
+    def get(self):
+        track_id = request.args.get('id')
+        filepath = safe_join("./", "test.mp3")
+        return send_file(
+            filename_or_fp=filepath,
+            mimetype="application/x-download"
+        )
+
 @ns_rest.route('/getArtists')
 class getArtists(Resource):
     @jwt_required()
