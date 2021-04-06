@@ -49,14 +49,14 @@ class GetPlaylists(Resource):
             return {'success': False, 'message': 'Failed to get playlists'}
 
 @ns_rest.route('/getAlbumList')
-class GetPlaylists(Resource):
+class getAlbumList(Resource):
     @jwt_required()
     def get(self):
         return {      "success" : True,      "albumList2" : {         "album" : [ {            "id" : "29",            "name" : "Robot Wars",            "artist" : "Binärpilot",            "artistId" : "15",            "coverArt" : "al-29",            "songCount" : 6,            "duration" : 1678,            "playCount" : 21240,            "created" : "2017-03-12T11:08:04.000Z",            "year" : 2007,            "genre" : "Electronic"         }, {            "id" : "28",            "name" : "Defrag",            "artist" : "Binärpilot",            "artistId" : "15",            "coverArt" : "al-28",            "songCount" : 4,            "duration" : 916,            "playCount" : 13701,            "created" : "2017-03-12T11:08:01.000Z",            "year" : 2005,            "genre" : "Electronic"         } ]      }   }
 
 @ns_rest.route('/getCoverArt')
 @api.representation('image/jpeg')
-class GetPlaylists(Resource):
+class getCoverArt(Resource):
     def get(self):
         filepath = safe_join("./", "rosé.jpg")
         return send_file(
@@ -65,19 +65,19 @@ class GetPlaylists(Resource):
         )
 
 @ns_rest.route('/getArtists')
-class GetPlaylists(Resource):
+class getArtists(Resource):
     @jwt_required()
     def get(self):
         return {    "success": True,    "artists": {      "ignoredArticles": "The El La Los Las Le",      "index": [        {          "name": "S",          "artist": [            {              "id": "18",              "name": "Shearer",              "coverArt": "ar-18",              "artistImageUrl": "https://lastfm-img2.akamaized.net/i/u/a7994c768b914543a2f2928d42559311.png",              "albumCount": 2            },            {              "id": "3",              "name": "Silence is Sexy",              "coverArt": "ar-3",              "artistImageUrl": "https://lastfm-img2.akamaized.net/i/u/959cdf5d084e4d42864a919281b3d58e.png",              "albumCount": 2            }          ]        },        {          "name": "U",          "artist": [            {              "id": "13",              "name": "Ugress",              "coverArt": "ar-13",              "artistImageUrl": "https://lastfm-img2.akamaized.net/i/u/6f2ce47efe15482eb5a3592e4d193ce7.png",              "albumCount": 4            }          ]        }      ]    }  }
 
 @ns_rest.route('/getGenres')
-class GetPlaylists(Resource):
+class getGenres(Resource):
     @jwt_required()
     def get(self):
         return {    "success": True,    "genres": {      "genre": [        {          "songCount": 118,          "albumCount": 13,          "value": "(255)"        },        {          "songCount": 56,          "albumCount": 6,          "value": "Podcast"        },        {          "songCount": 1,          "albumCount": 1,          "value": "Ska"        }      ]    }  }
 
 @ns_rest.route('/getStarred2')
-class GetPlaylists(Resource):
+class getStarred2(Resource):
     @jwt_required()
     def get(self):
         return {    "success": True,    "starred2": {      "song": [        {          "id": "358",          "parent": "346",          "isDir": false,          "title": "Drop that apple, bitch!",          "album": "Eve",          "artist": "Shearer",          "track": 8,          "year": 2008,          "genre": "Rock",          "coverArt": "346",          "size": 614528,          "contentType": "audio/mpeg",          "suffix": "mp3",          "duration": 37,          "bitRate": 128,          "path": "Shearer/Eve/08 - Drop that apple, bitch!.mp3",          "averageRating": 1,          "playCount": 747,          "created": "2017-03-12T11:05:16.000Z",          "starred": "2021-04-04T08:59:22.515Z",          "albumId": "37",          "artistId": "18",          "type": "music"        },        {          "id": "273",          "parent": "261",          "isDir": false,          "title": "Project Wildfire",          "album": "Robot Wars",          "artist": "Binärpilot",          "track": 4,          "year": 2007,          "genre": "Electronic",          "coverArt": "261",          "size": 5060736,          "contentType": "audio/mpeg",          "suffix": "mp3",          "duration": 316,          "bitRate": 128,          "path": "Binaerpilot/Robot Wars/04_binaerpilot_-_project_wildfire.mp3",          "averageRating": 5,          "playCount": 2734,          "created": "2017-03-12T11:08:03.000Z",          "starred": "2021-04-04T08:58:55.660Z",          "albumId": "29",          "artistId": "15",          "type": "music"        },        {          "id": "369",          "parent": "368",          "isDir": false,          "title": "Faya Ska",          "album": "Full Faya II",          "artist": "FUll Faya Orchestra",          "track": 2,          "year": 2008,          "genre": "Reggae",          "coverArt": "368",          "size": 4255872,          "contentType": "audio/mpeg",          "suffix": "mp3",          "duration": 264,          "bitRate": 128,          "path": "Full Faya Orchestra/Full Faya II/02 - Faya Ska.mp3",          "playCount": 1316,          "created": "2017-03-12T11:05:23.000Z",          "starred": "2018-09-25T06:54:12.810Z",          "albumId": "38",          "artistId": "19",          "type": "music"        }      ]    }  }
