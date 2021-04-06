@@ -37,15 +37,6 @@ class UserRegister(Resource):
         is_success = db.add_user(name=data['name'], email=data['email'], password=data['password']) is not None
         return {'success': is_success}
 
-@ns_rest.route('/ping')
-class Ping(Resource):
-    def get(self):
-        return {"subsonic-response" : {
-                "status" : "ok",
-                "version" : "1.16.1"
-            }
-        }
-
 @ns_rest.route('/getPlaylists')
 class GetPlaylists(Resource):
     def get(self):
