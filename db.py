@@ -223,6 +223,49 @@ def get_artist(artist_id):
         'album': albums
     }
 
+def get_playlist(playlist_id):
+    playlist = Playlist.query.filter_by(id=playlist_id).one_or_none()
+    tracks = []
+    count = 0
+    for track in playlist.tracks:
+        count += 1
+        tracks.append({
+            'id': track.id,
+            'parent': 25,
+            'isDir': False,
+            'title': track.name,
+            'album': track.album.title,
+            'artist': 'Artist 1',
+            'track': len(track.album.tracks),
+            'genre': track.genre_name,
+            'coverArt': track.album.cover_image,
+            'size': 123456,
+            'contentType': 'audio/mpeg',
+            'suffix': 'mp3',
+            'duration': 285,
+            'bitRate': 128,
+            'path': 'tracks/track1.mp3',
+            'playCount': 1000,
+            'created': str(track.date_added),
+            'starred': str(track.date_added),
+            'albumId': track.album.id,
+            'artistId': '1',
+            'type': 'music'
+        })
+    return {
+        'id': playlist.id,
+        'name': playlist.name,
+        'comment': '',
+        'owner': playlist.created_by.name,
+        'public': playlist.is_public,
+        'songCount': count,
+        'duration': 1234,
+        'created': str(playlist.date_added),
+        'changed': str(playlist.date_modified),
+        'coverArt': playlist.image,
+        'entry': tracks
+    }
+
 def get_album(user, album_id):
     album = Album.query.filter_by(id=album_id).one_or_none()
     songs = []

@@ -50,6 +50,13 @@ class GetPlaylists(Resource):
             print(e)
             return {'success': False, 'message': 'Failed to get playlists'}
 
+@ns_rest.route('/getPlaylist')
+class GetPlaylist(Resource):
+    @jwt_required()
+    def get(self):
+        playlist_id = request.args.get('id')
+        return {'success': True, 'playlist': db.get_playlist(playlist_id)}
+
 @ns_rest.route('/getAlbumList')
 class getAlbumList(Resource):
     @jwt_required()
