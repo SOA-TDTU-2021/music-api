@@ -108,19 +108,16 @@ class Playlist(sql.Model):
 class AlbumRating(sql.Model):
     album_id = sql.Column(sql.Integer, sql.ForeignKey("album.id"), primary_key=True)
     user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"), primary_key=True)
-    star = sql.Column(sql.Integer)
     time = sql.Column(sql.DateTime, default=datetime.now)
 
 class TrackRating(sql.Model):
     track_id = sql.Column(sql.Integer, sql.ForeignKey("track.id"), primary_key=True)
     user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"), primary_key=True)
-    star = sql.Column(sql.Integer)
     time = sql.Column(sql.DateTime, default=datetime.now)
 
 class PlaylistRating(sql.Model):
     playlist_id = sql.Column(sql.Integer, sql.ForeignKey("playlist.id"), primary_key=True)
     user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"), primary_key=True)
-    star = sql.Column(sql.Integer)
     time = sql.Column(sql.DateTime, default=datetime.now)
 
 class Played(sql.Model):
@@ -196,8 +193,8 @@ def get_all_artists():
         })
     return result
 
-def get_album(id):
-    album = Album.query.filter_by(id=id).one_or_none()
+def get_album(user, album_id):
+    album = Album.query.filter_by(id=album_id).one_or_none()
     songs = []
     for tr in album.tracks:
         songs.append({
@@ -224,6 +221,7 @@ def get_album(id):
             'artistId': '1',
             'type': 'music'
         })
+    starred = AlbumRating.query.filter_by(album_id=album.id).filter_by(user_id=user.id).one_or_none()
     return {
         'id': album.id,
         'name': album.title,
@@ -234,7 +232,29 @@ def get_album(id):
         'duration': 1234,
         'playCount': 100000,
         'created': str(album.date_added),
+        'starred': starred is not None,
         'year': 2021,
         'genre': album.genre.name,
         'song': songs
     }
+
+def star_album(user, album_id):
+    star = AlbumRating(album_id=album_id)
+    try:
+        user.rated_albums.append(star)
+        sql.session.add(user)
+        sql.session.commit()
+        return star.album_id
+    except Exception as e:
+        print(e)
+        return None
+
+def unstar_album(user, album_id):
+    try:
+        star = AlbumRating.query.filter_by(album_id=album_id).filter_by(user_id=user.id).one_or_none()
+        sql.session.delete(star)
+        sql.session.commit()
+        return True
+    except Exception as e:
+        print(e)
+        return False

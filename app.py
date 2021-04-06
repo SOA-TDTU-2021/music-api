@@ -106,7 +106,7 @@ class getAlbumList(Resource):
     @jwt_required()
     def get(self):
         album_id = request.args.get('id')
-        return {'success': True, 'album': db.get_album(album_id)}
+        return {'success': True, 'album': db.get_album(current_user, album_id)}
 
 @ns_rest.route('/getCoverArt')
 @api.representation('image/jpeg')
@@ -145,6 +145,28 @@ class getArtists(Resource):
         except Exception as e:
             print(e)
             return {'success': False, 'message': 'Failed to get artists'}
+
+@ns_rest.route('/star')
+class star(Resource):
+    @jwt_required()
+    def get(self):
+        if request.args.get('albumId'):
+            album_id = request.args.get('albumId')
+            success = db.star_album(current_user, album_id) is not None
+            return {'success': success}
+        else:
+            return {'success': False, 'message': 'Wrong starred type'}
+
+@ns_rest.route('/unstar')
+class unstar(Resource):
+    @jwt_required()
+    def get(self):
+        if request.args.get('albumId'):
+            album_id = request.args.get('albumId')
+            success = db.unstar_album(current_user, album_id)
+            return {'success': success}
+        else:
+            return {'success': False, 'message': 'Wrong unstarred type'}
 
 @ns_rest.route('/getGenres')
 class getGenres(Resource):
