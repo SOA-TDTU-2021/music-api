@@ -79,6 +79,8 @@ class getAlbumList(Resource):
                 albums = db.Album.query.order_by(db.Album.title).offset(offset).limit(limit).all()
             elif request_type == 'alphabeticalByName':
                 albums = db.Album.query.order_by(func.random()).offset(offset).limit(limit).all()
+            elif request_type == 'byGenre':
+                albums = db.Album.query.join(db.Genre).filter_by(name=request.args.get('genre')).offset(offset).limit(limit).all()
             else:
                 return {'success': False, 'message': 'Wrong album type'}
             result = []
@@ -179,7 +181,7 @@ class unstar(Resource):
 class getGenres(Resource):
     @jwt_required()
     def get(self):
-        return {    "success": True,    "genres": {      "genre": [        {          "songCount": 118,          "albumCount": 13,          "value": "(255)"        },        {          "songCount": 56,          "albumCount": 6,          "value": "Podcast"        },        {          "songCount": 1,          "albumCount": 1,          "value": "Ska"        }      ]    }  }
+        return {'success': True, 'genres': {'genre': db.get_genres()}}
 
 @ns_rest.route('/getStarred2')
 class getStarred2(Resource):
