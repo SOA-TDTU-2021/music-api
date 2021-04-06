@@ -128,7 +128,7 @@ class Played(sql.Model):
     user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
     track_id = sql.Column(sql.Integer, sql.ForeignKey("track.id"))
     count = sql.Column(sql.Integer)
-    play_time = sql.Column('time', sql.DateTime, default=datetime.now)
+    last_play_time = sql.Column('time', sql.DateTime, default=datetime.now)
 
 def get_user_by_id(user_id):
     return User.query.filter_by(id=user_id).one_or_none()
