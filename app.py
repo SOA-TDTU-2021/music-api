@@ -101,6 +101,13 @@ class getAlbumList(Resource):
             print(e)
             return {'success': False, 'message': 'Failed to get playlists'}
 
+@ns_rest.route('/getAlbum')
+class getAlbumList(Resource):
+    @jwt_required()
+    def get(self):
+        album_id = request.args.get('id')
+        return {'success': True, 'album': db.get_album(album_id)}
+
 @ns_rest.route('/getCoverArt')
 @api.representation('image/jpeg')
 class getCoverArt(Resource):

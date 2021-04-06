@@ -195,3 +195,46 @@ def get_all_artists():
             'artist': indexes[i]
         })
     return result
+
+def get_album(id):
+    album = Album.query.filter_by(id=id).one_or_none()
+    songs = []
+    for tr in album.tracks:
+        songs.append({
+            'id': tr.id,
+            'parent': 261,
+            'isDir': False,
+            'title': tr.name,
+            'album': album.title,
+            'artist': 'Artist 1',
+            'tracks': 1,
+            'year': 2021,
+            'genre': album.genre.name,
+            'coverArt': album.cover_image,
+            'size': 100000,
+            'contentType': 'audio/mpeg',
+            'suffix': 'mp3',
+            'duration': 285,
+            'bitRate': 128,
+            'path': 'tracks/track1.mp3',
+            'playCount': 1000,
+            'created': str(tr.date_added),
+            'starred': str(tr.date_added),
+            'albumId': album.id,
+            'artistId': '1',
+            'type': 'music'
+        })
+    return {
+        'id': album.id,
+        'name': album.title,
+        'artist': 'Artist 1',
+        'artistId': '1',
+        'coverArt': album.cover_image,
+        'songCount': 2,
+        'duration': 1234,
+        'playCount': 100000,
+        'created': str(album.date_added),
+        'year': 2021,
+        'genre': album.genre.name,
+        'song': songs
+    }
