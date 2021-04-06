@@ -1,0 +1,11 @@
+--2021-04-06 18:04:56--  https://airsonic.netlify.app/api/rest/stream?id=272
+Resolving airsonic.netlify.app (airsonic.netlify.app)... 2a03:b0c0:3:d0::d25:d001, 2a03:b0c0:3:d0::d0c:3001, 18.159.128.50, ...
+Connecting to airsonic.netlify.app (airsonic.netlify.app)|2a03:b0c0:3:d0::d25:d001|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 212 [text/xml]
+Saving to: 'stream?id=272'
+
+stream?id=272              0%[                                   ]       0  --.-KB/s               stream?id=272            100%[==================================>]     212  --.-KB/s    in 0s      
+
+2021-04-06 18:04:57 (14.4 MB/s) - 'stream?id=272' saved [212/212]
+

@@ -118,6 +118,17 @@ class getCoverArt(Resource):
             mimetype="image/jpeg"
         )
 
+@ns_rest.route('/stream')
+@api.representation('audio/mpeg')
+class stream(Resource):
+    def get(self):
+        track_id = request.args.get('id')
+        filepath = safe_join("./", "test.mp3")
+        return send_file(
+            filename_or_fp=filepath,
+            mimetype="audio/mpeg"
+        )
+
 @ns_rest.route('/getArtists')
 class getArtists(Resource):
     @jwt_required()
