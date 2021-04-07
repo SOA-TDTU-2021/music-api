@@ -83,9 +83,9 @@ class getAlbumList(Resource):
                         continue
                     albums.append(p.track.album)
             elif request_type == 'newest':
-                albums = db.Album.query.order_by(db.Album.title).offset(offset).limit(limit).all()
+                albums = db.Album.query.order_by(desc(db.Album.id)).offset(offset).limit(limit).all()
             elif request_type == 'alphabeticalByName':
-                albums = db.Album.query.order_by(func.random()).offset(offset).limit(limit).all()
+                albums = db.Album.query.order_by(db.Album.title).offset(offset).limit(limit).all()
             elif request_type == 'byGenre':
                 albums = db.Album.query.join(db.Genre).filter_by(name=request.args.get('genre')).offset(offset).limit(limit).all()
             else:
