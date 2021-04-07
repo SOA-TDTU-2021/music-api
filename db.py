@@ -55,8 +55,8 @@ class Artist(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     name = sql.Column(sql.String(100))
     avatar_file = sql.Column(sql.String(100))
-    country = sql.Column(sql.String(100))
-    info = sql.Column(sql.Text)
+    cover_file = sql.Column(sql.String(100))
+    description = sql.Column(sql.Text)
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
     added_by_user_id = sql.Column(sql.Integer, sql.ForeignKey("user.id"))
@@ -84,7 +84,7 @@ class Album(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     title = sql.Column(sql.String(100))
     cover_image = sql.Column(sql.String(100))
-    date_release = sql.Column(sql.DateTime, default=datetime(1970, 1, 1))
+    year_release = sql.Column(sql.Integer, default=datetime.now().year)
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
     genre_name = sql.Column(sql.String(100), sql.ForeignKey("genre.name"))
@@ -154,7 +154,6 @@ def get_all_playlists():
         result.append({
             'id': p.id,
             'name': p.name,
-            'owner': p.created_by.name,
             'public': p.is_public,
             'songCount': len(p.tracks),
             'duration': duration,
@@ -178,7 +177,7 @@ def get_all_artists():
                 'id': a.id,
                 'name': a.name,
                 'coverArt': a.avatar_file,
-                'artistImageUrl': 'https://lastfm-img2.akamaized.net/i/u/da0f3b84bd72470492de2a2dc58afbe2.png',
+                'artistImageUrl': a.cover_file,
                 'albumCount': count
             }]
         else:
@@ -186,7 +185,7 @@ def get_all_artists():
                 'id': a.id,
                 'name': a.name,
                 'coverArt': a.avatar_file,
-                'artistImageUrl': 'https://lastfm-img2.akamaized.net/i/u/da0f3b84bd72470492de2a2dc58afbe2.png',
+                'artistImageUrl': a.cover_file,
                 'albumCount': count
             })
     for i in indexes.keys():
@@ -199,69 +198,46 @@ def get_all_artists():
 def get_artist(artist_id):
     artist = Artist.query.filter_by(id=artist_id).one_or_none()
     albums = []
-    count = 0
     for album in artist.albums:
-        count += 1
         albums.append({
             'id': album.id,
             'name': album.title,
-            'artist': 'Artist 1',
-            'artistId': '1',
+            'artist': artist.name,
+            'artistId': artist.id,
             'coverArt': album.cover_image,
-            'songCount': 2,
-            'duration': 1234,
-            'playCount': 100000,
-            'created': str(album.date_added),
-            'year': 2021,
-            'genre': album.genre.name
         })
     return {
         'id': artist.id,
         'name': artist.name,
-        'description': 'Xin chào, mình là Sang đây!',
+        'description': artist.description,
         'coverArt': artist.avatar_file,
         'artistImageUrl': artist.avatar_file,
-        'albumCount': count,
+        'albumCount': len(artist.albums),
         'album': albums
     }
 
 def get_playlist(playlist_id):
     playlist = Playlist.query.filter_by(id=playlist_id).one_or_none()
     tracks = []
-    count = 0
+    duration = 0
     for track in playlist.tracks:
-        count += 1
+        duration += track.duration
+    for track in playlist.tracks:
         tracks.append({
             'id': track.id,
-            'parent': 25,
-            'isDir': False,
             'title': track.name,
             'album': track.album.title,
-            'artist': 'Artist 1',
-            'track': len(track.album.tracks),
-            'genre': track.genre_name,
-            'coverArt': track.album.cover_image,
-            'size': 123456,
-            'contentType': 'audio/mpeg',
-            'suffix': 'mp3',
-            'duration': 285,
-            'bitRate': 128,
-            'path': 'tracks/track1.mp3',
-            'playCount': 1000,
-            'created': str(track.date_added),
-            'starred': str(track.date_added),
+            'artist': track.artists[0].name,
+            'duration': track.duration,
             'albumId': track.album.id,
-            'artistId': '1',
-            'type': 'music'
+            'artistId': track.artists[0].id
         })
     return {
         'id': playlist.id,
         'name': playlist.name,
-        'comment': '',
-        'owner': playlist.created_by.name,
         'public': playlist.is_public,
-        'songCount': count,
-        'duration': 1234,
+        'songCount': len(playlist.tracks),
+        'duration': duration,
         'created': str(playlist.date_added),
         'changed': str(playlist.date_modified),
         'coverArt': playlist.image,
@@ -270,47 +246,33 @@ def get_playlist(playlist_id):
 
 def get_album(user, album_id):
     album = Album.query.filter_by(id=album_id).one_or_none()
+    duration = 0
+    for track in album.tracks:
+        duration += track.duration
     songs = []
     starred_album = AlbumRating.query.filter_by(album_id=album.id).filter_by(user_id=user.id).one_or_none()
     for tr in album.tracks:
         starred_track = TrackRating.query.filter_by(track_id=tr.id)
         songs.append({
             'id': tr.id,
-            'parent': 261,
-            'isDir': False,
             'title': tr.name,
-            'album': album.title,
-            'artist': 'Artist 1',
-            'tracks': 1,
-            'year': 2021,
-            'genre': album.genre.name,
-            'coverArt': album.cover_image,
-            'size': 100000,
-            'contentType': 'audio/mpeg',
-            'suffix': 'mp3',
-            'duration': 285,
-            'bitRate': 128,
-            'path': 'tracks/track1.mp3',
-            'playCount': 1000,
-            'created': str(tr.date_added),
-            'starred': starred_track is not None,
-            'albumId': album.id,
-            'artistId': 1,
-            'type': 'music'
+            'album': tr.album.title,
+            'artist': tr.artists[0].name,
+            'duration': tr.duration,
+            'albumId': tr.album.id,
+            'artistId': tr.artists[0].id,
+            'starred': starred_track is not None
         })
     return {
         'id': album.id,
         'name': album.title,
-        'artist': 'Artist 1',
-        'artistId': '1',
+        'artist': album.artists[0].name,
+        'artistId': album.artists[0].id,
         'coverArt': album.cover_image,
-        'songCount': 2,
-        'duration': 1234,
-        'playCount': 100000,
+        'songCount': len(album.tracks),
         'created': str(album.date_added),
         'starred': starred_album is not None,
-        'year': 2021,
-        'genre': album.genre.name,
+        'year': album.year_release,
         'song': songs
     }
 

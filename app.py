@@ -45,7 +45,7 @@ class GetPlaylists(Resource):
     def get(self):
         try:
             playlists = db.get_all_playlists()
-            return {'success': True, 'playlists': {'playlist': playlists}}
+            return {'success': True, 'playlists': playlists}
         except Exception as e:
             print(e)
             return {'success': False, 'message': 'Failed to get playlists'}
@@ -92,20 +92,22 @@ class getAlbumList(Resource):
                 return {'success': False, 'message': 'Wrong album type'}
             result = []
             for a in albums:
+                duration = 0
+                for track in a.tracks:
+                    duration += track.duration
                 result.append({
                     'id': a.id,
                     'name': a.title,
-                    'artist': 'Rosé',
-                    'artistId': '1',
+                    'artist': a.artists[0].name,
+                    'artistId': a.artists[0].id,
                     'coverArt': a.cover_image,
-                    'songCount': 6,
-                    'duration': 1678,
-                    'playCount': 1234,
+                    'songCount': len(a.tracks),
+                    'duration': duration,
                     'created': str(a.date_added),
-                    'year': 2007,
+                    'year': a.year_release,
                     'genre': a.genre.name
                 })
-            return {'success': True, 'albumList2': {'album': result}}
+            return {'success': True, 'albums': result}
         except Exception as e:
             print(e)
             return {'success': False, 'message': 'Failed to get playlists'}
@@ -158,7 +160,6 @@ class getArtists(Resource):
             return {
                 'success': True,
                 'artists': {
-                    'ignoredArticles': 'The El La Los Las Le',
                     'index': artists
                 }
             }
@@ -207,7 +208,7 @@ class unstar(Resource):
 class getGenres(Resource):
     @jwt_required()
     def get(self):
-        return {'success': True, 'genres': {'genre': db.get_genres()}}
+        return {'success': True, 'genres': db.get_genres()}
 
 @ns_rest.route('/getSongsByGenre')
 class getSongsByGenre(Resource):
@@ -217,31 +218,19 @@ class getSongsByGenre(Resource):
         count = request.args.get('count')
         result = []
         tracks = db.Track.query.filter_by(genre_name=request.args.get('genre')).offset(offset).limit(count).all()
-        for t in tracks:
+        for track in tracks:
+            starred_tracks = db.TrackRating.query.filter_by(track_id=track.id).filter_by(user_id=current_user.id).one_or_none()
             result.append({
-                'id': t.id,
-                'parent': 25,
-                'isDir': False,
-                'title': t.name,
-                'album': t.album.title,
-                'artist': 'Artist 1',
-                'track': len(t.album.tracks),
-                'genre': t.genre_name,
-                'coverArt': t.album.cover_image,
-                'size': 123456,
-                'contentType': 'audio/mpeg',
-                'suffix': 'mp3',
-                'duration': 285,
-                'bitRate': 128,
-                'path': 'tracks/track1.mp3',
-                'playCount': 1000,
-                'created': str(t.date_added),
-                'starred': str(t.date_added),
-                'albumId': t.album.id,
-                'artistId': '1',
-                'type': 'music'
+                'id': track.id,
+                'title': track.name,
+                'album': track.album.title,
+                'artist': track.artists[0].name,
+                'duration': track.duration,
+                'albumId': track.album.id,
+                'artistId': track.artists[0].id,
+                'starred': starred_tracks is not None
             })
-        return {'success': True, 'songsByGenre': {'song': result}}
+        return {'success': True, 'songs':result}
 
 @ns_rest.route('/getRandomSongs')
 class getRandomSongs(Resource):
@@ -250,64 +239,40 @@ class getRandomSongs(Resource):
         size = request.args.get('size')
         result = []
         tracks = db.Track.query.order_by(func.random()).limit(size).all()
-        for t in tracks:
+        for track in tracks:
+            starred_tracks = db.TrackRating.query.filter_by(track_id=track.id).filter_by(user_id=current_user.id).one_or_none()
             result.append({
-                'id': t.id,
-                'parent': 25,
-                'isDir': False,
-                'title': t.name,
-                'album': t.album.title,
-                'artist': 'Artist 1',
-                'track': len(t.album.tracks),
-                'genre': t.genre_name,
-                'coverArt': t.album.cover_image,
-                'size': 123456,
-                'contentType': 'audio/mpeg',
-                'suffix': 'mp3',
-                'duration': 285,
-                'bitRate': 128,
-                'path': 'tracks/track1.mp3',
-                'playCount': 1000,
-                'created': str(t.date_added),
-                'starred': str(t.date_added),
-                'albumId': t.album.id,
-                'artistId': '1',
-                'type': 'music'
+                'id': track.id,
+                'title': track.name,
+                'album': track.album.title,
+                'artist': track.artists[0].name,
+                'duration': track.duration,
+                'albumId': track.album.id,
+                'artistId': track.artists[0].id,
+                'starred': starred_tracks is not None
             })
-        return {'success': True, 'randomSongs': {'song': result}}
+        return {'success': True, 'randomSongs': result}
 
-@ns_rest.route('/getStarred2')
-class getStarred2(Resource):
+@ns_rest.route('/getStarred')
+class getStarred(Resource):
     @jwt_required()
     def get(self):
         result = []
-        rating = db.TrackRating.query.filter_by(user_id=current_user.id).all()
-        for r in rating:
-            t = r.track
+        track_rating = db.TrackRating.query.filter_by(user_id=current_user.id).all()
+        for r in track_rating:
+            track = r.track
+            starred_tracks = db.TrackRating.query.filter_by(track_id=track.id).filter_by(user_id=current_user.id).one_or_none()
             result.append({
-                'id': t.id,
-                'parent': 25,
-                'isDir': False,
-                'title': t.name,
-                'album': t.album.title,
-                'artist': 'Artist 1',
-                'track': len(t.album.tracks),
-                'genre': t.genre_name,
-                'coverArt': t.album.cover_image,
-                'size': 123456,
-                'contentType': 'audio/mpeg',
-                'suffix': 'mp3',
-                'duration': 285,
-                'bitRate': 128,
-                'path': 'tracks/track1.mp3',
-                'playCount': 1000,
-                'created': str(t.date_added),
-                'starred': str(t.date_added),
-                'albumId': t.album.id,
-                'artistId': '1',
-                'type': 'music'
+                'id': track.id,
+                'title': track.name,
+                'album': track.album.title,
+                'artist': track.artists[0].name,
+                'duration': track.duration,
+                'albumId': track.album.id,
+                'artistId': track.artists[0].id,
+                'starred': starred_tracks is not None
             })
-        return {'success': True, 'starred2': {'song': result}}
+        return {'success': True, 'starred': {'song': result, 'artist': None, 'album': None}}
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
