@@ -148,14 +148,16 @@ def get_all_playlists():
     result = []
     playlists = Playlist.query.all()
     for p in playlists:
+        duration = 0
+        for track in p.tracks:
+            duration += track.duration
         result.append({
             'id': p.id,
             'name': p.name,
-            'comment': '',
             'owner': p.created_by.name,
             'public': p.is_public,
-            'songCount': 12,
-            'duration': 2483,
+            'songCount': len(p.tracks),
+            'duration': duration,
             'created': str(p.date_added),
             'changed': str(p.date_modified),
             'coverArt': p.image
