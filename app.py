@@ -70,6 +70,15 @@ class createPlaylist(Resource):
                 'public': result.is_public
             }}
 
+@ns_rest.route('/updatePlaylist')
+class updatePlaylist(Resource):
+    @jwt_required()
+    def get(self):
+        playlist_id = request.args.get('playlistId'),
+        song_id = request.args.get('songIdToAdd')
+        is_success = db.add_song_to_playlist(playlist_id, song_id)
+        return {'success': is_success}
+
 @ns_rest.route('/getAlbumList')
 class getAlbumList(Resource):
     @jwt_required()

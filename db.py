@@ -190,12 +190,23 @@ def get_playlist(playlist_id):
 
 def create_playlist(playlist_name):
     playlist = Playlist(name=playlist_name, is_public=True)
-    sql.session.add(playlist)
     try:
+        sql.session.add(playlist)
         sql.session.commit()
         return playlist
     except Exception as e:
         return None
+
+def add_song_to_playlist(playlist_id, song_id):
+    playlist = Playlist.query.filter_by(id=playlist_id).one_or_none()
+    track = Track.query.filter_by(id=song_id).one_or_none()
+    playlist.tracks.append(track)
+    try:
+        sql.session.add(playlist)
+        sql.session.commit()
+        return True
+    except Exception as e:
+        return False
 
 def get_all_artists():
     artists = Artist.query.all()
