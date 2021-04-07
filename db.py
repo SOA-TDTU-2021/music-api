@@ -97,7 +97,6 @@ class Album(sql.Model):
 class Playlist(sql.Model):
     id = sql.Column(sql.Integer, primary_key=True)
     name = sql.Column(sql.String(100))
-    image = sql.Column(sql.String(100))
     is_public = sql.Column(sql.Boolean)
     date_added = sql.Column(sql.DateTime, default=datetime.now)
     date_modified = sql.Column(sql.DateTime, default=datetime.now)
@@ -159,9 +158,44 @@ def get_all_playlists():
             'duration': duration,
             'created': str(p.date_added),
             'changed': str(p.date_modified),
-            'coverArt': p.image
         })
     return result
+
+def get_playlist(playlist_id):
+    playlist = Playlist.query.filter_by(id=playlist_id).one_or_none()
+    tracks = []
+    duration = 0
+    for track in playlist.tracks:
+        duration += track.duration
+    for track in playlist.tracks:
+        tracks.append({
+            'id': track.id,
+            'title': track.name,
+            'album': track.album.title,
+            'artist': track.artists[0].name,
+            'duration': track.duration,
+            'albumId': track.album.id,
+            'artistId': track.artists[0].id
+        })
+    return {
+        'id': playlist.id,
+        'name': playlist.name,
+        'public': playlist.is_public,
+        'songCount': len(playlist.tracks),
+        'duration': duration,
+        'created': str(playlist.date_added),
+        'changed': str(playlist.date_modified),
+        'entry': tracks
+    }
+
+def create_playlist(playlist_name):
+    playlist = Playlist(name=playlist_name, is_public=True)
+    sql.session.add(playlist)
+    try:
+        sql.session.commit()
+        return playlist
+    except Exception as e:
+        return None
 
 def get_all_artists():
     artists = Artist.query.all()
@@ -214,34 +248,6 @@ def get_artist(artist_id):
         'artistImageUrl': artist.avatar_file,
         'albumCount': len(artist.albums),
         'album': albums
-    }
-
-def get_playlist(playlist_id):
-    playlist = Playlist.query.filter_by(id=playlist_id).one_or_none()
-    tracks = []
-    duration = 0
-    for track in playlist.tracks:
-        duration += track.duration
-    for track in playlist.tracks:
-        tracks.append({
-            'id': track.id,
-            'title': track.name,
-            'album': track.album.title,
-            'artist': track.artists[0].name,
-            'duration': track.duration,
-            'albumId': track.album.id,
-            'artistId': track.artists[0].id
-        })
-    return {
-        'id': playlist.id,
-        'name': playlist.name,
-        'public': playlist.is_public,
-        'songCount': len(playlist.tracks),
-        'duration': duration,
-        'created': str(playlist.date_added),
-        'changed': str(playlist.date_modified),
-        'coverArt': playlist.image,
-        'entry': tracks
     }
 
 def get_album(user, album_id):

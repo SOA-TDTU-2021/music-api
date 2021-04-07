@@ -57,6 +57,19 @@ class GetPlaylist(Resource):
         playlist_id = request.args.get('id')
         return {'success': True, 'playlist': db.get_playlist(playlist_id)}
 
+@ns_rest.route('/createPlaylist')
+class createPlaylist(Resource):
+    @jwt_required()
+    def get(self):
+        playlist_name = request.args.get('name')
+        result = db.create_playlist(playlist_name)
+        if result is not None:
+            return {'success': True, 'playlist': {
+                'id': result.id,
+                'name': result.name,
+                'public': result.is_public
+            }}
+
 @ns_rest.route('/getAlbumList')
 class getAlbumList(Resource):
     @jwt_required()
